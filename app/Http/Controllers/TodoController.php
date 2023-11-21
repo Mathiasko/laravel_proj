@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Task;
+use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 
 class TodoController extends Controller
 {
   public function index()
   {
-    $tasks = session('tasks', []);
-    return view('todo', compact('tasks'));
+    return Inertia::render('Todo', ['tasks' => Task::all(), 'test' => 'test'])->withViewData(['meta' => 'TODO']);
   }
 
   public function clear_todo()
@@ -20,50 +20,44 @@ class TodoController extends Controller
     return redirect()->route('todo');
   }
 
-  public function remove_task(Request $request)
-  {
-      $taskId = $request->input('taskId');
-      $tasks = session('tasks', []);
-  
-      $tasks = array_filter($tasks, function ($task) use ($taskId) {
-          return $task->id !== $taskId;
-      });
-  
-      session(['tasks' => $tasks]);
-  
-      return response()->json(['success' => true]);
-  }  
-
-  public function add_task(Request $request)
+  public function edit_task($id, Request $request)
   {
     $validator = Validator::make($request->all(), [
-      'task' => 'required|string',
+      'value' => 'required|string',
     ]);
 
     if ($validator->fails()) {
       return redirect()->route('todo')->withErrors($validator)->withInput();
     }
 
-    $tasks = session('tasks', []);
-    $task = $request->input('task', 'no str');
-    $newTask = new Task($task);
-    $tasks[] = $newTask;
-
-    session(['tasks' => $tasks]);
-
+    $newValue = $request->input('value', 'no str');
+    $task = Task::find($id);
+    $task->value = $newValue;
+    $task->save();
     return redirect()->route('todo');
   }
-}
 
-class Task
-{
-  public $id;
-  public $value;
-
-  public function __construct($value)
+  public function remove_task(Task $id)
   {
-    $uuid = Str::uuid();
-    $this->id = $uuid;
-    $this->value = $value;
+    $id->delete();
+    return redirect()->route('todo');
+  }
+
+  public function add_task(Request $request)
+  {
+    $validator = Validator::make($request->all(), [
+      'value' => 'required|string',
+    ]);
+
+    if ($validator->fails()) {
+      return redirect()->route('todo')->withErrors($validator)->withInput();
+    }
+
+    $task = $request->input('value', 'no str');
+    $newTask = new Task(['value' => $task]);
+
+    $newTask->save();
+
+    return to_route('todo');
   }
 }

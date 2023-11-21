@@ -1,3 +1,6 @@
+@extends('layouts.app')
+
+@section('content')
 <h1>{{$heading}}</h1>
 
 @unless(count($listings) ==0)
@@ -15,3 +18,4 @@
 @else
 <p>no listings</p>
 @endunless
+@endsection

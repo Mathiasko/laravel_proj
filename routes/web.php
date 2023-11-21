@@ -4,7 +4,6 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-use Illuminate\Foundation\Application;
 use App\Http\Controllers\ProfileController;
 
 use App\Models\Listing;
@@ -25,16 +24,34 @@ Route::get('search', function (Request $request) {
   return $request->name; //jano
 });
 
-Route::get('/', function () {
-  return Inertia::render('Welcome', [
-    'canLogin' => Route::has('login'),
-    'canRegister' => Route::has('register'),
-    'laravelVersion' => Application::VERSION,
-    'phpVersion' => PHP_VERSION,
-  ]);
-});
+Route::get('/dashboard', function () {
+  return Inertia::render('Dashboard')->withViewData(['meta' => 'Dashboard']);
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/movie', function () {
+  return Inertia::render('Movie')->withViewData(['meta' => 'Movie']);
+})->name('movie');
+
+Route::get('/todo', [App\Http\Controllers\TodoController::class, 'index'])->name('todo');
+Route::post('/todo', [App\Http\Controllers\TodoController::class, 'add_task'])->name('add_task');
+Route::delete('/todo/{id}', [App\Http\Controllers\TodoController::class, 'remove_task'])->name('remove_task');
+Route::patch('/todo/{id}', [App\Http\Controllers\TodoController::class, 'edit_task'])->name('edit_task');
+
+Route::get('/test', function () {
+  return Inertia::render('Test');
+})->name('test');
+
+//PHP VIEWS
 
 // -- ALL LISTINGS  --
+Route::get('/', function () {
+  return view('home');
+})->name('home');
+
+Route::get('/old', function () {
+  return view('welcome');
+})->name('old');
+
 Route::get('/listings', function () {
   return view('listings', [
     'heading' => 'Latest Listings',
@@ -50,23 +67,15 @@ Route::get('/listings/{id}', function ($id) {
   ]);
 })->name('listing');
 
-Route::get('/old', function () {
-  return view('welcome');
-})->name('old');
-
-Route::get('/dashboard', function () {
-  return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::get('/abc', [App\Http\Controllers\AbcController::class, 'index'])->name('abc');
 
 Route::get('/counter', [App\Http\Controllers\CounterController::class, 'index'])->name('counter');
 Route::post('/counter/update', [App\Http\Controllers\CounterController::class, 'update'])->name('update');
 
-Route::get('/todo', [App\Http\Controllers\TodoController::class, 'index'])->name('todo');
-Route::post('/todo/clear_todo', [App\Http\Controllers\TodoController::class, 'clear_todo'])->name('clear_todo');
-Route::post('/todo/add_task', [App\Http\Controllers\TodoController::class, 'add_task'])->name('add_task');
-Route::post('/todo/remove_task', [App\Http\Controllers\TodoController::class, 'remove_task'])->name('remove_task');
+// Route::get('/todo', [App\Http\Controllers\TodoController::class, 'index'])->name('todo');
+// Route::post('/todo/clear_todo', [App\Http\Controllers\TodoController::class, 'clear_todo'])->name('clear_todo');
+// Route::post('/todo/add_task', [App\Http\Controllers\TodoController::class, 'add_task'])->name('add_task');
+// Route::post('/todo/remove_task', [App\Http\Controllers\TodoController::class, 'remove_task'])->name('remove_task');
 
 
 Route::middleware('auth')->group(function () {

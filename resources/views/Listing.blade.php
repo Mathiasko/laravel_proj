@@ -1,3 +1,5 @@
+@extends('layouts.app')
+@section('content')
 <h1>{{$heading}}</h1>
 
 @unless(!$listing)
@@ -9,3 +11,4 @@
 @else
 <p>no listing with such id</p>
 @endunless
+@endsection
